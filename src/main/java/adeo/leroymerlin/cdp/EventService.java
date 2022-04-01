@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,7 +51,7 @@ public class EventService {
      * @param query of the given Event.
      * @return List<Event>
      */
-    public List<Event> getFilteredEvents(String query) {
+    public List<Event> getFilteredEvent(String query) {
         List<Event> events = eventRepository.findAllBy();
         if (CollectionUtils.isEmpty(events))
             return events;
@@ -63,5 +62,46 @@ public class EventService {
                         band.getMembers().stream().anyMatch(member ->
                                 member.getName().toLowerCase().contains(query.toLowerCase()))))
                 .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Displayed only the events with at least one band has a member with the name matching the given query.
+     *
+     * @param query of the given Event.
+     * @return List<Event>
+     */
+    public List<Event> getFilteredEvents(String query) {
+        List<Event> events = eventRepository.findAllBy();
+        if (CollectionUtils.isEmpty(events))
+            return events;
+
+
+        // Filter the events list in pure JAVA here
+        List<Event> eventsFiltred = new ArrayList<>();
+
+        events.forEach(event -> {
+            Set<Band> bandsFiltred = new HashSet<>();
+            Band bandFiltred = new Band();
+            event.getBands().forEach(band -> {
+                Set<Member> membersFiltred = new HashSet<>();
+                band.getMembers().forEach(member -> {
+                    if(member.getName().toLowerCase().contains(query.toLowerCase())) {
+                        membersFiltred.add(member);
+                    }
+                });
+                if(!CollectionUtils.isEmpty(membersFiltred)) {
+                    bandFiltred.setName(band.getName());
+                    bandFiltred.setMembers(membersFiltred);
+                    bandsFiltred.add(bandFiltred);
+                }
+            });
+            if(!CollectionUtils.isEmpty(bandsFiltred)) {
+                Event eventFiltred = new Event(event.getId(), event.getTitle(), event.getImgUrl(), bandsFiltred, event.getNbStars(), event.getComment());
+                eventsFiltred.add(eventFiltred);
+            }
+        });
+
+        return eventsFiltred;
     }
 }

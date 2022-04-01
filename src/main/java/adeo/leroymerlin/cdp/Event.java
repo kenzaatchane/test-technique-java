@@ -20,6 +20,18 @@ public class Event {
 
     private String comment;
 
+    public Event() {
+    }
+
+    public Event(Long id, String title, String imgUrl, Set<Band> bands, Integer nbStars, String comment) {
+        this.id = id;
+        this.title = title;
+        this.imgUrl = imgUrl;
+        this.bands = bands;
+        this.nbStars = nbStars;
+        this.comment = comment;
+    }
+
     public Long getId() {
         return id;
     }
